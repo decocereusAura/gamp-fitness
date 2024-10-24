@@ -1,0 +1,180 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  input:-webkit-autofill,
+  input:-webkit-autofill:focus {
+    transition: background-color 0s 600000s, color 0s 600000s !important;
+  }
+  :root {
+    --background: 0 0% 99%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 0 0% 98%;
+    --primary-text: 0 0% 11%;
+    --primary-foreground: 0 0% 9%;
+
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 1% 65%;
+    --muted-foreground: 0 0% 63.9%;
+
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 91%;
+
+    --glitch-pink: 299 100% 79%;
+    --basecamp-blue: 180 100% 68%;
+    --blue: 206 100% 38%;
+    --ultimate-blue: 225 96% 62%;
+    --green: 151 100% 38%;
+    --virtual-green: 86 100% 65%;
+    --white: 0 0% 100%;
+    --tab-yellow: #ffcd43;
+    --hype-yellow: 60 100% 65%;
+    --red: #ff5656;
+    --white: 0 0% 99%;
+    --yellow: 43 100% 50%;
+    --grey-100: 0 0% 97%;
+    --grey-200: 0 0% 90%;
+    --grey-300: #a6a6a8;
+    --grey-400: #545659;
+    --grey-500: 216 7% 13%;
+    --grey-600: #121212;
+    --grey-temp: #f7f7f7;
+    --grey-stroke: #e5e5e5;
+    --light-white: #f8f8f8;
+    --divider: #ededed;
+    --card-bg: #f7f7f7;
+    --dim-grey: #a9a9a9;
+    --dark-grey: #1d1d1d;
+    --light-grey: #e7e7e7;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 1px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+#_blitz-container {
+  margin: 0 auto;
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4,
+.markdown h5,
+.markdown h6 {
+  margin-bottom: 8px;
+  line-height: 140%;
+  font-weight: 600;
+}
+
+.markdown p,
+.markdown span {
+  margin-bottom: 32px;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 160%;
+}
+
+.markdown h1 {
+  font-size: 28px;
+}
+
+.markdown h2 {
+  font-size: 26px;
+}
+
+.markdown h3 {
+  font-size: 24px;
+}
+
+.markdown h4 {
+  font-size: 22px;
+}
+
+.markdown h5 {
+  font-size: 20px;
+}
+
+.markdown h6 {
+  font-size: 18px;
+}
+
+.markdown p img {
+  margin: 0 auto;
+}
+
+.markdown ul,
+.markdown ol {
+  list-style: initial;
+  padding-left: 15px;
+  margin-bottom: 20px;
+}
+
+.markdown ul > li > p,
+.markdown ol > li > p {
+  margin-bottom: 15px;
+}
+
+.markdown a {
+  text-decoration: underline;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
