@@ -1,3 +1,5 @@
+import GampFitnessHeader from "@/components/header/header";
+import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "../../styles/globals.css";
@@ -20,7 +22,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${roboto.className} dark`}>{children}</body>
+      <body className={`${roboto.className} dark`}>
+        <GampFitnessHeader />
+        {children}
+        <Toaster />
+      </body>
     </html>
   );
 }

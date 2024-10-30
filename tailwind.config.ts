@@ -41,7 +41,7 @@ const config = {
     extend: {
       fontFamily: {
         gelica: ["var(--font-gelica)", ...fontFamily.sans],
-        silka: ["var(--font-silka)", ...fontFamily.sans],
+        silka: ["var(--font-roboto)", ...fontFamily.sans],
       },
       transitionDuration: {
         "2000": "2000ms",

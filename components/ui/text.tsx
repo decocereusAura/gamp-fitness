@@ -105,13 +105,13 @@ export const textVariants = cva("", {
       all: "break-all",
     },
     fontFamily: {
-      silka: "font-silka",
-      gelica: "font-gelica",
+      silka: "font-roboto",
+      gelica: "font-roboto",
     },
   },
   defaultVariants: {
     intent: "body",
-    color: "black",
+    color: "lightWhite",
     fontFamily: "silka",
   },
 });

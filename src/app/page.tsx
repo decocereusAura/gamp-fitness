@@ -1,11 +1,9 @@
-import Text from "../../components/ui/text";
+import ParticipantTable from "@/components/participant-table/participant-table";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <Text intent={"pageHeadline"} color={"grey-600"}>
-        Hello World
-      </Text>
+    <main className="flex flex-col items-center  p-3 xxs:p-6 xs:px-24 xs:py-12  min-h-screen h-full">
+      <ParticipantTable />
     </main>
   );
 }
