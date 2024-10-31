@@ -133,7 +133,10 @@ const WeekClientForm = ({
           description: `${participantName}'s data for week ${userWeekDetails?.week} has been updated.`,
           action: {
             label: "View Progress",
-            onClick: () => router.push(`/weekly-progress/${participantId}`),
+            onClick: () =>
+              router.push(
+                `/weekly-progress/${participantId}?name=${participantName}`
+              ),
           },
         });
       }

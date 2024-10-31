@@ -2,6 +2,7 @@
 
 import { fetchLeaderboard } from "@/lib/action";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "../ui/button";
 
 const FetchScores = () => {
@@ -11,6 +12,7 @@ const FetchScores = () => {
       <Button
         onClick={() => {
           fetchLeaderboard();
+          toast(`Updated leaderboard!`);
           router.refresh();
         }}
       >
