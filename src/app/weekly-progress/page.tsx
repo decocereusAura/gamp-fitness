@@ -38,7 +38,7 @@ async function AllWeeklyDataPage() {
             >
               Oops it seems there is no recorded progress at the moment.
             </Text>
-            <Link href={"/"}>
+            <Link href={"/gampers"}>
               <Button className={"w-full"}>Add Gampers</Button>
             </Link>
           </div>
