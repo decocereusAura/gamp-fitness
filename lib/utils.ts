@@ -27,3 +27,17 @@ export const WeeklyUserProgressHeaders = [
   "Muscle Gain %",
   "Improvement Consistency",
 ];
+
+export const LeaderboardHeaders = [
+  "Gamper",
+  "Fitness Performance Score",
+  "Weight/Muscle Score",
+  "Total Score",
+];
+
+export const getProdCloudFrontUrl = (imagePath: string) => {
+  const cleanedPath = imagePath?.startsWith("/")
+    ? imagePath.slice(1)
+    : imagePath;
+  return `${process.env.NEXT_PUBLIC_PROD_IMAGES}${cleanedPath}`;
+};

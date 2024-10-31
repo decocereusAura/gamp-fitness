@@ -1,66 +1,46 @@
-// import * as fs from "fs";
-// import * as XLSX from "xlsx";
-// import { filePath } from "./utils";
+import { UserWeekDetails } from "@/components/participant-form/week-client-form";
 
-// export const calculateScores = () => {
-//   // Read the workbook
-//   const fileBuffer = fs.readFileSync(filePath);
-//   const workbook = XLSX.read(fileBuffer, { type: "buffer" });
-//   const weeklyData = XLSX.utils.sheet_to_json(
-//     workbook.Sheets["WeeklyProgress"]
-//   );
-//   const leaderboard = [];
-//   const participantScores: any = {};
+export const calculateScore = (weeklyData: UserWeekDetails[]) => {
+  const WEEKLY_BREAKDOWN: Record<number, { week: number; score: number }> = {
+    1: { week: 1, score: 0 },
+    2: { week: 2, score: 0 },
+    3: { week: 3, score: 0 },
+    4: { week: 4, score: 0 },
+    5: { week: 5, score: 0 },
+    6: { week: 6, score: 0 },
+    7: { week: 7, score: 0 },
+    8: { week: 8, score: 0 },
+    9: { week: 9, score: 0 },
+    10: { week: 10, score: 0 },
+    11: { week: 11, score: 0 },
+    12: { week: 12, score: 0 },
+  };
+  weeklyData.forEach((entry: any) => {
+    const {
+      week,
+      workoutConsistency,
+      caloriesBurned,
+      sessionParticipation,
+      weightLossPercentage,
+      muscleGainPercentage,
+      improvementConsistency,
+    } = entry;
 
-//   // Calculate scores
-//   weeklyData.forEach((entry: any) => {
-//     const {
-//       "Participant ID": participantId,
-//       "Workout Consistency": workout,
-//       "Calories Burned / Steps Taken": caloriesOrSteps,
-//       "Session Participation": sessions,
-//       "Weight Loss (%)": weightLoss,
-//       "Muscle Gain (%)": muscleGain,
-//       "Improvement Consistency": consistency,
-//     } = entry;
+    let fitnessScore = 0;
+    let weightMuscleScore = 0;
+    let finalScore = 0;
 
-//     if (!participantScores[participantId]) {
-//       participantScores[participantId] = {
-//         participantId,
-//         fitnessScore: 0,
-//         weightMuscleScore: 0,
-//         totalScore: 0,
-//       };
-//     }
-
-//     let fitnessScore = 0;
-//     let weightMuscleScore = 0;
-
-//     // Scoring Logic
-//     fitnessScore += Math.min(25, (workout / 5) * 25);
-//     fitnessScore += Math.min(15, (caloriesOrSteps / 10000) * 15);
-//     fitnessScore += Math.min(10, (sessions / 2) * 10);
-//     weightMuscleScore += Math.min(30, ((weightLoss + muscleGain) / 10) * 30);
-//     weightMuscleScore += Math.min(20, (consistency / 12) * 20);
-
-//     participantScores[participantId].fitnessScore += fitnessScore;
-//     participantScores[participantId].weightMuscleScore += weightMuscleScore;
-//     participantScores[participantId].totalScore =
-//       participantScores[participantId].fitnessScore +
-//       participantScores[participantId].weightMuscleScore;
-//   });
-
-//   // Format leaderboard
-//   for (const score of Object.values(participantScores) as any) {
-//     leaderboard.push({
-//       "Participant ID": score.participantId,
-//       "Fitness Performance Score": score.fitnessScore,
-//       "Weight/Muscle Score": score.weightMuscleScore,
-//       "Total Score": score.totalScore,
-//     });
-//   }
-
-//   const leaderboardSheet = XLSX.utils.json_to_sheet(leaderboard);
-//   workbook.Sheets["Leaderboard"] = leaderboardSheet;
-//   XLSX.writeFile(workbook, filePath);
-// };
+    // Scoring Logic
+    fitnessScore += Math.min(25, (workoutConsistency / 5) * 25);
+    fitnessScore += Math.min(15, (caloriesBurned / 10000) * 15);
+    fitnessScore += Math.min(10, (sessionParticipation / 2) * 10);
+    weightMuscleScore += Math.min(
+      30,
+      ((weightLossPercentage + muscleGainPercentage) / 10) * 30
+    );
+    weightMuscleScore += Math.min(20, (improvementConsistency / 12) * 20);
+    finalScore = fitnessScore + weightMuscleScore;
+    WEEKLY_BREAKDOWN[week] = { week: week, score: finalScore };
+  });
+  return Object.values(WEEKLY_BREAKDOWN);
+};

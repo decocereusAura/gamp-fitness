@@ -35,7 +35,7 @@ const config = {
     },
     screens: {
       "2xl": "1400px",
-      xs: "500px",
+      xs: "700px",
       xxs: "375px",
     },
     extend: {

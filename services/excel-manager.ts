@@ -1,35 +1,36 @@
-// services/excel-manager.ts
+// services/ExcelManager.ts
 import { headers } from "next/headers";
 
-function getBaseUrl() {
-  if (typeof window === "undefined") {
-    const headersList = headers();
-    const host = headersList.get("host") || "localhost:3000";
-    const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
-    return `${protocol}://${host}`;
+class ExcelManager {
+  public static getBaseUrl(): string {
+    if (typeof window === "undefined") {
+      const headersList = headers();
+      const host = headersList.get("host") || "localhost:3000";
+      const protocol =
+        process.env.NODE_ENV === "development" ? "http" : "https";
+      return `${protocol}://${host}`;
+    }
+    return "";
   }
-  return "";
-}
 
-const excelManager = {
-  async readSheet(sheetName?: string) {
-    const baseUrl = getBaseUrl();
+  public static async readSheet(sheetName?: string): Promise<any> {
+    const baseUrl = this.getBaseUrl();
     const url = sheetName
       ? `${baseUrl}/api/excel?sheet=${encodeURIComponent(sheetName)}`
       : `${baseUrl}/api/excel`;
 
     const response = await fetch(url);
-
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error || "Failed to read sheet");
     }
-    const parsedResponse = await response.json();
-    return parsedResponse;
-  },
+    return await response.json();
+  }
 
-  async fetchWeeklyProgressData(participantId?: string) {
-    const baseUrl = getBaseUrl();
+  public static async fetchWeeklyProgressData(
+    participantId?: string
+  ): Promise<any> {
+    const baseUrl = this.getBaseUrl();
     const url = participantId
       ? `${baseUrl}/api/update-weekly-progress?participantId=${encodeURIComponent(
           participantId
@@ -37,88 +38,78 @@ const excelManager = {
       : `${baseUrl}/api/update-weekly-progress`;
 
     const response = await fetch(url);
-
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || "Failed to read sheet");
+      throw new Error(error.error || "Failed to fetch weekly progress data");
     }
-    const parsedResponse = await response.json();
-    return parsedResponse;
-  },
+    return await response.json();
+  }
 
-  async writeSheet(destination: string, data: any) {
-    const baseUrl = getBaseUrl();
-    const response = await fetch(`${baseUrl}/api/excel`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ destination, data }),
-    });
+  public static async fetchLeaderboard(): Promise<any> {
+    const baseUrl = this.getBaseUrl();
+    const url = `${baseUrl}/api/calculate-score`;
 
+    const response = await fetch(url);
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || "Failed to write sheet");
+      throw new Error(error.error || "Failed to fetch leaderboard");
     }
-    const parsedResponse = await response.json();
-    return parsedResponse;
-  },
+    return await response.json();
+  }
 
-  async addParticipant(data: any) {
-    const baseUrl = getBaseUrl();
+  public static async addParticipant(data: any): Promise<any> {
+    const baseUrl = this.getBaseUrl();
     const response = await fetch(`${baseUrl}/api/add-participant`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ data }),
     });
 
     if (!response.ok) {
       const error = await response.json();
-      console.log("error response", error);
-      throw new Error(error.error || "Failed to write sheet");
+      throw new Error(error.error || "Failed to add participant");
     }
+    return await response.json();
+  }
 
-    const parsedResponse = await response.json();
-    console.log("parsed response", parsedResponse);
-    return parsedResponse;
-  },
+  public static async computeLeaderboard(): Promise<any> {
+    const baseUrl = this.getBaseUrl();
+    const response = await fetch(`${baseUrl}/api/calculate-score`, {
+      method: "POST",
+    });
 
-  async addWeeklyProgress(data: any) {
-    const baseUrl = getBaseUrl();
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to compute leaderboard");
+    }
+    return await response.json();
+  }
+
+  public static async addWeeklyProgress(data: any): Promise<any> {
+    const baseUrl = this.getBaseUrl();
     const response = await fetch(`${baseUrl}/api/update-weekly-progress`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ data }),
     });
 
     if (!response.ok) {
       const error = await response.json();
-      console.log("error response", error);
-      throw new Error(error.error || "Failed to write sheet");
+      throw new Error(error.error || "Failed to update weekly progress");
     }
+    return await response.json();
+  }
 
-    const parsedResponse = await response.json();
-    console.log("parsed response", parsedResponse);
-    return parsedResponse;
-  },
-
-  async getSheets() {
-    const baseUrl = getBaseUrl();
-    const response = await fetch(`${baseUrl}/api/excel`, {
-      method: "OPTIONS",
-    });
+  public static async getSheets(): Promise<any> {
+    const baseUrl = this.getBaseUrl();
+    const response = await fetch(`${baseUrl}/api/excel`, { method: "OPTIONS" });
 
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error || "Failed to get sheets");
     }
-    const parsedResponse = await response.json();
-    return parsedResponse;
-  },
-};
+    return await response.json();
+  }
+}
 
-export default excelManager;
+export default ExcelManager;
