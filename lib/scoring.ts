@@ -31,14 +31,17 @@ export const calculateScore = (weeklyData: UserWeekDetails[]) => {
     let finalScore = 0;
 
     // Scoring Logic
-    fitnessScore += Math.min(25, (workoutConsistency / 5) * 25);
-    fitnessScore += Math.min(15, (caloriesBurned / 10000) * 15);
-    fitnessScore += Math.min(10, (sessionParticipation / 2) * 10);
+    fitnessScore += Math.min(25, (Number(workoutConsistency) / 5) * 25);
+    fitnessScore += Math.min(15, (Number(caloriesBurned) / 10000) * 15);
+    fitnessScore += Math.min(10, (Number(sessionParticipation) / 2) * 10);
     weightMuscleScore += Math.min(
       30,
-      ((weightLossPercentage + muscleGainPercentage) / 10) * 30
+      ((Number(weightLossPercentage) + Number(muscleGainPercentage)) / 10) * 30
     );
-    weightMuscleScore += Math.min(20, (improvementConsistency / 12) * 20);
+    weightMuscleScore += Math.min(
+      20,
+      (Number(improvementConsistency) / 12) * 20
+    );
     finalScore = fitnessScore + weightMuscleScore;
     WEEKLY_BREAKDOWN[week] = { week: week, score: finalScore };
   });

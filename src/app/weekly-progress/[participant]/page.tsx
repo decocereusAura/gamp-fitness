@@ -4,6 +4,7 @@ import WeekClientForm, {
 } from "@/components/participant-form/week-client-form";
 import Text from "@/components/ui/text";
 import WeeklyProgressTable from "@/components/weekly-progress-table/weekly-progress.table";
+import { transformToCamelCase } from "@/lib/utils";
 import ExcelManager from "@/services/excel-manager";
 import { PageProps } from "@/types/page";
 import { User } from "lucide-react";
@@ -15,7 +16,9 @@ async function WeeklyProgressPage({
   const participantId = params?.participant as string;
   const participantName = searchParams?.name as string;
   const response = await ExcelManager.fetchWeeklyProgressData(participantId);
-  const weeklyUserProgress: UserWeekDetails[] = response.data;
+  const weeklyUserProgress: UserWeekDetails[] = transformToCamelCase(
+    response.data
+  );
   console.log("weeklyProgress", weeklyUserProgress);
   return (
     <main className="flex flex-col items-center p-3 xxs:p-6 xs:px-24 xs:py-12  min-h-screen h-full gap-y-10">

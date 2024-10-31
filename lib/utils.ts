@@ -35,9 +35,39 @@ export const LeaderboardHeaders = [
   "Total Score",
 ];
 
-export const getProdCloudFrontUrl = (imagePath: string) => {
-  const cleanedPath = imagePath?.startsWith("/")
-    ? imagePath.slice(1)
-    : imagePath;
-  return `${process.env.NEXT_PUBLIC_PROD_IMAGES}${cleanedPath}`;
-};
+function toSnakeCase(name: string): string {
+  return name.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase();
+}
+
+function toCamelCase(str: string): string {
+  return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+}
+
+export function transformToCamelCase(data: any): any {
+  if (Array.isArray(data)) {
+    return data.map((item) => transformToCamelCase(item));
+  } else if (data !== null && typeof data === "object") {
+    const transformedObj: Record<string, any> = {};
+    for (const key in data) {
+      const camelCaseKey = toCamelCase(key);
+      transformedObj[camelCaseKey] = data[key];
+    }
+    return transformedObj;
+  } else {
+    return data;
+  }
+}
+export function transformToSnake(data: any): any {
+  if (Array.isArray(data)) {
+    return data.map((item) => toSnakeCase(item));
+  } else if (data !== null && typeof data === "object") {
+    const transformedObj: Record<string, any> = {};
+    for (const key in data) {
+      const camelCaseKey = toSnakeCase(key);
+      transformedObj[camelCaseKey] = data[key];
+    }
+    return transformedObj;
+  } else {
+    return data;
+  }
+}

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { addParticipantRow } from "@/lib/action";
+import { transformToSnake } from "@/lib/utils";
 import {
   Activity,
   Dumbbell,
@@ -22,7 +23,7 @@ import { v4 as uuidv4 } from "uuid";
 
 export interface UserDetails {
   participantId: string;
-  name: string;
+  participantName: string;
   height: string;
   weight: string;
   bmi: string;
@@ -37,7 +38,7 @@ const ParticipantClientForm = () => {
   const router = useRouter();
   const [userDetails, setUserDetails] = useState<UserDetails>({
     participantId: uuidv4(),
-    name: "",
+    participantName: "",
     height: "",
     weight: "",
     bmi: "",
@@ -73,7 +74,7 @@ const ParticipantClientForm = () => {
     (Object.keys(userDetails) as Array<keyof UserDetails>).forEach((key) => {
       if (
         [
-          "name",
+          "participantName",
           "height",
           "weight",
           "bmi",
@@ -98,19 +99,21 @@ const ParticipantClientForm = () => {
   const handleAddData = async (participantDetails: UserDetails) => {
     const timeAdded = new Date();
     try {
-      const response = await addParticipantRow(participantDetails);
+      const response = await addParticipantRow(
+        transformToSnake(participantDetails)
+      );
       if (response?.message.includes("successfully")) {
         toast("Participant added successfully", {
-          description: `${participantDetails.name} has been added to the challenge.`,
+          description: `${participantDetails.participantName} has been added to the challenge.`,
           action: {
             label: "View Participants",
-            onClick: () => router.push("/participants"),
+            onClick: () => router.push("/gampers"),
           },
         });
       }
       if (response?.message.includes("exists")) {
         toast("Participant already exists", {
-          description: `${participantDetails.name} is already registered for the challenge.`,
+          description: `${participantDetails.participantName} is already registered for the challenge.`,
           action: {
             label: "Okay",
             onClick: () => console.log("Acknowledged"),
@@ -120,7 +123,7 @@ const ParticipantClientForm = () => {
     } catch (error: any) {
       console.error("Failed to add participant", error);
       toast("Failed to add participant", {
-        description: `An error occurred while adding ${participantDetails.name}. Please try again.`,
+        description: `An error occurred while adding ${participantDetails.participantName}. Please try again.`,
         action: {
           label: "Dismiss",
           onClick: () => console.log("Error dismissed"),
@@ -145,18 +148,20 @@ const ParticipantClientForm = () => {
             <div className="relative">
               <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
               <Input
-                id="name"
+                id="participantName"
                 type="text"
                 placeholder="Full Name"
-                name="name"
-                value={userDetails.name}
+                name="participantName"
+                value={userDetails.participantName}
                 onChange={handleChange}
                 className="pl-10"
                 required
               />
             </div>
-            {errors.name && (
-              <p className="text-sm text-destructive">{errors.name}</p>
+            {errors.participantName && (
+              <p className="text-sm text-destructive">
+                {errors.participantName}
+              </p>
             )}
           </div>
 

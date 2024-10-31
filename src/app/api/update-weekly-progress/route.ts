@@ -1,106 +1,106 @@
-import { UserWeekDetails } from "@/components/participant-form/week-client-form";
-import * as fs from "fs";
+import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
-import * as path from "path";
-import * as XLSX from "xlsx";
+
+export interface SnakeUserWeekProgress {
+  participant_id: string;
+  participant_name: string;
+  week?: number;
+  workout_consistency: number;
+  calories_burned?: number;
+  session_participation: number;
+  weight_loss_percentage?: number;
+  muscle_gain_percentage?: number;
+  improvement_consistency: number;
+}
 
 export async function POST(request: any) {
-  const incomingRequest = await request.json();
-  const weeklyData: UserWeekDetails = incomingRequest.data;
-  const filePath = path.resolve("database", "gamp-fitness.xlsx");
+  const incoming_request = await request.json();
+  const weekly_data: SnakeUserWeekProgress = incoming_request.data;
 
   try {
-    if (!fs.existsSync(filePath)) {
-      return NextResponse.json(
-        { error: "Workbook not found." },
-        { status: 404 }
-      );
-    }
-    const fileBuffer = fs.readFileSync(filePath);
-    const workbook = XLSX.read(fileBuffer, { type: "buffer" });
-    const sheet = workbook.Sheets["WeeklyProgress"];
-
-    if (!sheet) {
-      return NextResponse.json(
-        { error: "Sheet 'Participants' not found in workbook." },
-        { status: 404 }
-      );
-    }
-    const data: UserWeekDetails[] = XLSX.utils.sheet_to_json(sheet);
-
-    const rowExists = data.some(
-      (p: UserWeekDetails) =>
-        p.participantId === weeklyData.participantId &&
-        p.week === weeklyData.week
+    const existing_entry = await db.query(
+      `SELECT id FROM weekly_progress WHERE participant_id = $1 AND week = $2`,
+      [weekly_data.participant_id, weekly_data.week]
     );
 
-    if (!rowExists) {
-      data.push(weeklyData);
-      const newSheet = XLSX.utils.json_to_sheet(data);
-      workbook.Sheets["WeeklyProgress"] = newSheet;
-      const updatedWorkbookBuffer = XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "buffer",
-      });
-      fs.writeFileSync(filePath, updatedWorkbookBuffer);
-      return NextResponse.json({
-        message: `Weekly progress updated for ${weeklyData.week}`,
-      });
-    } else {
+    if (existing_entry.rows.length > 0) {
       return NextResponse.json({
         message: "This week's data already exists for this participant",
       });
     }
+
+    await db.query(
+      `INSERT INTO weekly_progress (
+        participant_id,
+        participant_name,
+        week,
+        workout_consistency,
+        calories_burned,
+        session_participation,
+        weight_loss_percentage,
+        muscle_gain_percentage,
+        improvement_consistency
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [
+        weekly_data.participant_id,
+        weekly_data.participant_name,
+        weekly_data.week,
+        weekly_data.workout_consistency,
+        weekly_data.calories_burned,
+        weekly_data.session_participation,
+        weekly_data.weight_loss_percentage,
+        weekly_data.muscle_gain_percentage,
+        weekly_data.improvement_consistency,
+      ]
+    );
+
+    return NextResponse.json({
+      message: `Weekly progress updated for week ${weekly_data.week}`,
+    });
   } catch (error) {
+    console.error("Error updating weekly progress:", error);
     return NextResponse.json(
-      { error: "Error updating weekly progress", errorMessage: error },
+      { error: "Error updating weekly progress", error_message: error },
       { status: 500 }
     );
   }
 }
 
 export async function GET(request: any) {
-  const participantId =
-    request.nextUrl.searchParams.get("participantId") || "all";
-  const filePath = path.resolve("database", "gamp-fitness.xlsx");
+  const participantId = request.nextUrl.searchParams.get("participantId");
+  console.log("fetching participant", participantId);
 
   try {
-    if (!fs.existsSync(filePath)) {
-      return NextResponse.json(
-        { error: "Workbook not found." },
-        { status: 404 }
-      );
-    }
-    const fileBuffer = fs.readFileSync(filePath);
-    const workbook = XLSX.read(fileBuffer, { type: "buffer" });
-    const sheet = workbook.Sheets["WeeklyProgress"];
+    let result;
 
-    if (!sheet) {
-      return NextResponse.json(
-        { error: "Sheet 'Participants' not found in workbook." },
-        { status: 404 }
+    if (participantId && participantId !== "all") {
+      result = await db.query(
+        `SELECT * FROM weekly_progress WHERE participant_id = $1`,
+        [participantId]
       );
+    } else {
+      result = await db.query(`SELECT * FROM weekly_progress`);
     }
-    const data: UserWeekDetails[] = XLSX.utils.sheet_to_json(sheet);
-    if (data.length > 0 && participantId !== "all") {
-      const filteredData = data.filter(
-        (p: UserWeekDetails) => p.participantId === participantId
-      );
-      return NextResponse.json({
-        data: filteredData,
-        message: `Found ${filteredData.length} entries for this participant`,
-      });
-    }
-    if (data.length > 0 && participantId === "all") {
+
+    const data = result.rows;
+
+    if (data.length > 0) {
+      const message =
+        participantId && participantId !== "all"
+          ? `Found ${data.length} entries for this participant`
+          : "Weekly data for all participants";
+
       return NextResponse.json({
         data,
-        message: `Weekly data for all participants`,
+        message,
       });
     }
+
     return NextResponse.json({
-      message: `There is no weekly progress data.`,
+      message: "There is no weekly progress data.",
     });
   } catch (error) {
+    console.error("Error fetching weekly progress:", error);
     return NextResponse.json(
       { error: "Error fetching weekly progress", errorMessage: error },
       { status: 500 }

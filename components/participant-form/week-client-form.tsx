@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { addWeeklyData } from "@/lib/action";
+import { transformToSnake } from "@/lib/utils";
 import {
   Calendar,
   Dna,
@@ -114,7 +115,7 @@ const WeekClientForm = ({
   const handleWeeklyUpdate = async (data: UserWeekDetails) => {
     const timeAdded = new Date();
     try {
-      const response = await addWeeklyData(data);
+      const response = await addWeeklyData(transformToSnake(data));
       if (response?.message.includes("exists")) {
         toast(
           `Week ${userWeekDetails?.week} data already exists for ${participantName}`,

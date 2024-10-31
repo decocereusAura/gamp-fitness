@@ -32,6 +32,7 @@ export function WeeklyBarChart({
 }: {
   weeklyUserProgress: UserWeekDetails[];
 }) {
+  console.log("weeklyUserProgress", weeklyUserProgress);
   const chartData = calculateScore(weeklyUserProgress);
   console.log(chartData);
   return (

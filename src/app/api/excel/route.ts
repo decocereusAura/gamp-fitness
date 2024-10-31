@@ -1,87 +1,58 @@
-// app/api/excel/route.ts
-import * as fs from "fs";
+import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
-import * as path from "path";
-import * as XLSX from "xlsx";
-
-// Helper function to get Excel file path
-function getExcelPath() {
-  return path.join(process.cwd(), "database", "gamp-fitness.xlsx");
-}
 
 export async function GET(request: NextRequest) {
-  // Using NextRequest's searchParams instead of URL parsing
   const sheetName = request.nextUrl.searchParams.get("sheet") || "Participants";
-  const filePath = getExcelPath();
-
-  try {
-    // Verify file exists
-    if (!fs.existsSync(filePath)) {
-      return NextResponse.json(
-        { error: `Excel file not found at ${filePath}` },
-        { status: 404 }
-      );
-    }
-
-    const fileBuffer = fs.readFileSync(filePath);
-    const workbook = XLSX.read(fileBuffer, { type: "buffer" });
-
-    // Check if sheet exists
-    if (!workbook.SheetNames.includes(sheetName)) {
+  let query = "";
+  switch (sheetName) {
+    case "Participants":
+      query = `
+        SELECT participant_id, participant_name, height, weight, bmi, 
+               bmi_proof_url, ideal_bmi, target_weight, targeted_muscle_gain, 
+               current_body_mass_report_url, created_at, updated_at
+        FROM participants;
+      `;
+      break;
+    case "WeeklyProgress":
+      query = `
+        SELECT id, participant_id, participant_name, week, workout_consistency, 
+               calories_burned, session_participation, weight_loss_percentage, 
+               muscle_gain_percentage, improvement_consistency, created_at, updated_at
+        FROM weekly_progress;
+      `;
+      break;
+    case "Leaderboard":
+      query = `
+        SELECT participant_id, participant_name, fitness_score, 
+               weight_muscle_score, total_score, created_at, updated_at
+        FROM leaderboard;
+      `;
+      break;
+    default:
       return NextResponse.json(
         {
           error: "Sheet not found",
-          availableSheets: workbook.SheetNames,
+          availableSheets: ["participants", "weekly_progress", "leaderboard"],
         },
         { status: 404 }
       );
-    }
+  }
 
-    const sheet = workbook.Sheets[sheetName];
-    const data = XLSX.utils.sheet_to_json(sheet);
+  try {
+    const result = await db.query(query);
+    const data = result.rows;
 
     return NextResponse.json({
       data,
       sheetName,
       totalRows: data.length,
-      availableSheets: workbook.SheetNames,
+      availableSheets: ["Participants", "WeeklyProgress", "Leaderboard"],
     });
   } catch (error: any) {
-    console.error("Excel read error:", error);
+    console.error("Database query error:", error);
     return NextResponse.json(
       {
-        error: "Error reading Excel file",
-        details: error.message,
-        path: filePath,
-      },
-      { status: 500 }
-    );
-  }
-}
-
-// Optional: Add a route to get all sheet names
-export async function OPTIONS(request: Request) {
-  const filePath = getExcelPath();
-
-  try {
-    if (!fs.existsSync(filePath)) {
-      return NextResponse.json(
-        { error: "Excel file not found" },
-        { status: 404 }
-      );
-    }
-
-    const fileBuffer = fs.readFileSync(filePath);
-    const workbook = XLSX.read(fileBuffer, { type: "buffer" });
-
-    return NextResponse.json({
-      sheets: workbook.SheetNames,
-      path: filePath,
-    });
-  } catch (error: any) {
-    return NextResponse.json(
-      {
-        error: "Error reading Excel file",
+        error: "Error querying database",
         details: error.message,
       },
       { status: 500 }

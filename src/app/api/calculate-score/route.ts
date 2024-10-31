@@ -1,123 +1,119 @@
-import * as fs from "fs";
+import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
-import * as path from "path";
-import * as XLSX from "xlsx";
 
 export async function POST() {
-  const filePath = path.resolve("database", "gamp-fitness.xlsx");
-  const leaderboard = [];
-  const participantScores: any = {};
+  const leaderboard: any[] = [];
+  const participantScores: Record<string, any> = {};
 
   try {
-    const fileBuffer = fs.readFileSync(filePath);
-    const workbook = XLSX.read(fileBuffer, { type: "buffer" });
-    const weeklyData = XLSX.utils.sheet_to_json(
-      workbook.Sheets["WeeklyProgress"]
-    );
+    const weeklyData = await db.query(`
+      SELECT 
+        participant_id, participant_name, week, workout_consistency, 
+calories_burned, session_participation, weight_loss_percentage, 
+muscle_gain_percentage, improvement_consistency
+      FROM weekly_progress;
+    `);
+
     const participantsNames: Record<string, string> = {};
 
-    weeklyData.forEach((entry: any) => {
+    weeklyData.rows.forEach((entry: any) => {
       const {
-        participantId,
-        participantName,
-        week,
-        workoutConsistency,
-        caloriesBurned,
-        sessionParticipation,
-        weightLossPercentage,
-        muscleGainPercentage,
-        improvementConsistency,
+        participant_id,
+        participant_name,
+        workout_consistency,
+        calories_burned,
+        session_participation,
+        weight_loss_percentage,
+        muscle_gain_percentage,
+        improvement_consistency,
       } = entry;
 
-      if (!participantScores[participantId]) {
-        participantScores[participantId] = {
-          participantId,
-          fitnessScore: 0,
-          weightMuscleScore: 0,
-          totalScore: 0,
+      if (!participantScores[participant_id]) {
+        participantScores[participant_id] = {
+          participant_id,
+          fitness_score: 0,
+          weight_muscle_score: 0,
+          total_score: 0,
         };
       }
 
-      let fitnessScore = 0;
-      let weightMuscleScore = 0;
+      let fitness_score = 0;
+      let weight_muscle_score = 0;
 
-      // Scoring Logic
-      fitnessScore += Math.min(25, (workoutConsistency / 5) * 25);
-      fitnessScore += Math.min(15, (caloriesBurned / 10000) * 15);
-      fitnessScore += Math.min(10, (sessionParticipation / 2) * 10);
-      weightMuscleScore += Math.min(
+      fitness_score += Math.min(25, (Number(workout_consistency) / 5) * 25);
+      fitness_score += Math.min(15, (Number(calories_burned) / 10000) * 15);
+      fitness_score += Math.min(10, (Number(session_participation) / 2) * 10);
+      weight_muscle_score += Math.min(
         30,
-        ((weightLossPercentage + muscleGainPercentage) / 10) * 30
+        ((Number(weight_loss_percentage) + Number(muscle_gain_percentage)) /
+          10) *
+          30
       );
-      weightMuscleScore += Math.min(20, (improvementConsistency / 12) * 20);
+      weight_muscle_score += Math.min(
+        20,
+        (Number(improvement_consistency) / 12) * 20
+      );
 
-      participantScores[participantId].fitnessScore += fitnessScore;
-      participantScores[participantId].weightMuscleScore += weightMuscleScore;
-      participantScores[participantId].totalScore =
-        participantScores[participantId].fitnessScore +
-        participantScores[participantId].weightMuscleScore;
+      participantScores[participant_id].fitness_score += fitness_score;
+      participantScores[participant_id].weight_muscle_score +=
+        weight_muscle_score;
 
-      participantsNames[participantId] = participantName;
+      participantScores[participant_id].total_score =
+        participantScores[participant_id].fitness_score +
+        participantScores[participant_id].weight_muscle_score;
+
+      participantsNames[participant_id] = participant_name;
+      console.log("participantScores in route", participantScores);
     });
 
-    // Format leaderboard
     for (const score of Object.values(participantScores) as any) {
-      leaderboard.push({
-        participantId: score.participantId,
-        participantName: participantsNames[score.participantId],
-        fitnessScore: score.fitnessScore,
-        weightMuscleScore: score.weightMuscleScore,
-        totalScore: score.totalScore,
-      });
+      await db.query(
+        `
+        INSERT INTO Leaderboard (participant_id, participant_name, fitness_score, weight_muscle_score, total_score)
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (participant_id) DO UPDATE
+        SET fitness_score = EXCLUDED.fitness_score,
+            weight_muscle_score = EXCLUDED.weight_muscle_score,
+            total_score = EXCLUDED.total_score;
+      `,
+        [
+          score.participant_id,
+          participantsNames[score.participant_id],
+          score.fitness_score,
+          score.weight_muscle_score,
+          score.total_score,
+        ]
+      );
     }
 
-    const leaderboardSheet = XLSX.utils.json_to_sheet(leaderboard);
-    workbook.Sheets["Leaderboard"] = leaderboardSheet;
-    const updatedWorkbookBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "buffer",
-    });
-    fs.writeFileSync(filePath, updatedWorkbookBuffer);
     return NextResponse.json({ message: "Score updated successfully" });
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json(
-      { error: "Error updating score" },
+      { error: "Error updating score", details: error.message },
       { status: 500 }
     );
   }
 }
 
 export async function GET() {
-  const filePath = path.resolve("database", "gamp-fitness.xlsx");
   try {
-    if (!fs.existsSync(filePath)) {
-      return NextResponse.json(
-        { error: "Workbook not found." },
-        { status: 404 }
-      );
-    }
-    const fileBuffer = fs.readFileSync(filePath);
-    const workbook = XLSX.read(fileBuffer, { type: "buffer" });
-    const sheet = workbook.Sheets["Leaderboard"];
-    if (!sheet) {
-      return NextResponse.json(
-        { error: "Sheet 'Leaderboard' not found in workbook." },
-        { status: 404 }
-      );
-    }
-    const data: any[] = XLSX.utils.sheet_to_json(sheet);
-    if (data && data.length > 0) {
+    const leaderboardData = await db.query(`
+      SELECT participant_id, participant_name, fitness_score, weight_muscle_score, total_score
+      FROM Leaderboard;
+    `);
+
+    if (leaderboardData.rows.length > 0) {
       return NextResponse.json({
-        data: data,
-        message: `Scores for ${data.length} entries`,
+        data: leaderboardData.rows,
+        message: `Scores for ${leaderboardData.rows.length} entries`,
       });
     }
     return NextResponse.json({
       message: `No scoring data available`,
     });
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json(
-      { error: "Error fetching scores", errorMessage: error },
+      { error: "Error fetching scores", details: error.message },
       { status: 500 }
     );
   }

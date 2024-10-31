@@ -48,6 +48,7 @@ class ExcelManager {
   public static async fetchLeaderboard(): Promise<any> {
     const baseUrl = this.getBaseUrl();
     const url = `${baseUrl}/api/calculate-score`;
+    const computingScore = await this.computeLeaderboard();
 
     const response = await fetch(url);
     if (!response.ok) {
@@ -96,17 +97,6 @@ class ExcelManager {
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error || "Failed to update weekly progress");
-    }
-    return await response.json();
-  }
-
-  public static async getSheets(): Promise<any> {
-    const baseUrl = this.getBaseUrl();
-    const response = await fetch(`${baseUrl}/api/excel`, { method: "OPTIONS" });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Failed to get sheets");
     }
     return await response.json();
   }

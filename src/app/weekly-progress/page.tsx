@@ -2,13 +2,16 @@ import { UserWeekDetails } from "@/components/participant-form/week-client-form"
 import { Button } from "@/components/ui/button";
 import Text from "@/components/ui/text";
 import WeeklyProgressTable from "@/components/weekly-progress-table/weekly-progress.table";
+import { transformToCamelCase } from "@/lib/utils";
 import ExcelManager from "@/services/excel-manager";
 import { LoaderPinwheel } from "lucide-react";
 import Link from "next/link";
 
 async function AllWeeklyDataPage() {
   const response = await ExcelManager.fetchWeeklyProgressData();
-  const weeklyUserProgress: UserWeekDetails[] = response.data;
+  const weeklyUserProgress: UserWeekDetails[] = transformToCamelCase(
+    response.data
+  );
   console.log("all weekly progress", weeklyUserProgress);
   return (
     <main className="flex flex-col items-center p-3 xxs:p-6 xs:px-24 xs:py-12 min-h-screen h-full gap-y-16">
@@ -36,7 +39,6 @@ async function AllWeeklyDataPage() {
               Oops it seems there is no recorded progress at the moment.
             </Text>
             <Link href={"/"}>
-              {" "}
               <Button className={"w-full"}>Add Gampers</Button>
             </Link>
           </div>

@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { UserDetailsHeaders } from "@/lib/utils";
+import { transformToCamelCase, UserDetailsHeaders } from "@/lib/utils";
 import ExcelManager from "@/services/excel-manager";
 import { ArrowUpRight, FileText, Ruler, Scale, Target } from "lucide-react";
 import Link from "next/link";
@@ -18,7 +18,8 @@ import { UserDetails } from "../participant-form/user-client-form";
 
 export default async function ParticipantTable() {
   const response = await ExcelManager.readSheet("Participants");
-  const participantData: UserDetails[] = response.data;
+  const participantData: UserDetails[] = transformToCamelCase(response.data);
+  console.log("participantData", transformToCamelCase(participantData));
   if (participantData.length < 1) return <></>;
   return (
     <Card className="w-full">
@@ -51,12 +52,12 @@ export default async function ParticipantTable() {
                 className={index % 2 === 0 ? "bg-muted/50" : ""}
               >
                 <TableCell className="font-medium">
-                  {participant?.name}
+                  {participant.participantName}
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center space-x-2">
                     <Ruler className="h-4 w-4 text-blue-500" />
-                    <span>{participant?.height}</span>
+                    <span>{participant.height}</span>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -79,7 +80,7 @@ export default async function ParticipantTable() {
                 </TableCell>
                 <TableCell>
                   <Link
-                    href={participant.bmiProofUrl}
+                    href={String(participant.bmiProofUrl)}
                     target="_blank"
                     className="text-primary hover:underline flex items-center space-x-1"
                   >
@@ -133,7 +134,7 @@ export default async function ParticipantTable() {
                 </TableCell>
                 <TableCell className="text-right">
                   <Link
-                    href={`/weekly-progress/${participant.participantId}?name=${participant.name}`}
+                    href={`/weekly-progress/${participant.participantId}?name=${participant.participantName}`}
                   >
                     <Button size="sm">
                       View Progress

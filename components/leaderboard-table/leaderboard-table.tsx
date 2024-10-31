@@ -22,6 +22,7 @@ export interface UserScore {
 }
 
 function Leaderboard({ userScores }: { userScores: UserScore[] }) {
+  console.log("user", userScores);
   const sortedScores = [...userScores].sort(
     (a, b) => b.totalScore - a.totalScore
   );
@@ -79,11 +80,11 @@ function Leaderboard({ userScores }: { userScores: UserScore[] }) {
                   <div className="flex items-center space-x-2">
                     <Dumbbell className="h-4 w-4 text-blue-500" />
                     <Progress
-                      value={(participant.fitnessScore / 50) * 100}
+                      value={(Number(participant.fitnessScore) / 50) * 100}
                       className="w-full"
                     />
                     <span className="text-sm font-medium">
-                      {participant.fitnessScore.toFixed(2)}
+                      {Number(participant.fitnessScore).toFixed(2)}
                     </span>
                   </div>
                 </TableCell>
@@ -91,11 +92,11 @@ function Leaderboard({ userScores }: { userScores: UserScore[] }) {
                   <div className="flex items-center space-x-2">
                     <Scale className="h-4 w-4 text-green-500" />
                     <Progress
-                      value={(participant.weightMuscleScore / 50) * 100}
+                      value={(Number(participant.weightMuscleScore) / 50) * 100}
                       className="w-full"
                     />
                     <span className="text-sm font-medium">
-                      {participant.weightMuscleScore.toFixed(2)}
+                      {Number(participant.weightMuscleScore).toFixed(2)}
                     </span>
                   </div>
                 </TableCell>
@@ -103,11 +104,11 @@ function Leaderboard({ userScores }: { userScores: UserScore[] }) {
                   <div className="flex items-center space-x-2">
                     <Trophy className="h-4 w-4 text-purple-500" />
                     <Progress
-                      value={participant.totalScore}
+                      value={Number(participant.totalScore)}
                       className="w-full"
                     />
                     <span className="text-sm font-medium">
-                      {participant.totalScore.toFixed(2)}
+                      {Number(participant.totalScore).toFixed(2)}
                     </span>
                   </div>
                 </TableCell>
